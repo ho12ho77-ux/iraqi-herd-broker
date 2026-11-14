@@ -6,14 +6,14 @@ import { Label } from "@/components/ui/label";
 import { GOVERNORATES, districtsOf } from "@/lib/iraq";
 import { ANIMAL_TYPES, LISTINGS, formatNum } from "@/lib/market";
 
-type Search = { type?: string; gov?: string; district?: string; sort?: string };
+type Search = { type?: string | undefined; gov?: string | undefined; district?: string | undefined; sort?: string | undefined };
 
 export const Route = createFileRoute("/listings/")({
   validateSearch: (s: Record<string, unknown>): Search => ({
-    type: typeof s.type === "string" ? s.type : undefined,
-    gov: typeof s.gov === "string" ? s.gov : undefined,
-    district: typeof s.district === "string" ? s.district : undefined,
-    sort: typeof s.sort === "string" ? s.sort : undefined,
+    type: typeof s["type"] === "string" ? s["type"] : undefined,
+    gov: typeof s["gov"] === "string" ? s["gov"] : undefined,
+    district: typeof s["district"] === "string" ? s["district"] : undefined,
+    sort: typeof s["sort"] === "string" ? s["sort"] : undefined,
   }),
   head: () => ({
     meta: [

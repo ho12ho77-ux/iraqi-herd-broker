@@ -63,6 +63,13 @@ export function getListing(id: string): Listing | undefined {
   return LISTINGS.find((l) => l.id === id);
 }
 
+/** للبيانات التجريبية: إعلان معروف مسبقاً */
+export function sampleListing(index: number): Listing {
+  const l = LISTINGS[index];
+  if (!l) throw new Error(`sample listing ${index} missing`);
+  return l;
+}
+
 /* ---------- صلاحيات الإدارة ---------- */
 
 export type StaffRole = "super_admin" | "admin" | "staff";

@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Marketplace rules (guarantee rate, role→section permissions) live in `src/lib/market.ts` with tests in `src/lib/market.test.ts`; UI must call `canAccess`/`guaranteeAmount` rather than re-deriving them.
+- Iraqi location hierarchy (governorate → district → area) lives in `src/lib/iraq.ts`; reuse `LocationSelect` for every location input.
+- V1 is a design preview on sample data; forms show toasts only until Lovable Cloud is enabled.
