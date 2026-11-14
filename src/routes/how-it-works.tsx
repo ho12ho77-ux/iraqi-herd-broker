@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BadgeCheck, CheckCircle2, EyeOff, FileWarning, Lock, MessagesSquare, ShieldCheck, Truck, XCircle } from "lucide-react";
+import { Ban, BadgeCheck, CheckCircle2, EyeOff, FileWarning, Gauge, Lock, MessagesSquare, ShieldCheck, Star, Truck, XCircle } from "lucide-react";
 import { PageHeading } from "@/components/site/PageHeading";
 import { Button } from "@/components/ui/button";
 
@@ -40,7 +40,7 @@ function HowItWorks() {
       <div className="mx-auto grid max-w-5xl gap-12 px-4 py-12 sm:px-6">
         <section className="grid gap-4 sm:grid-cols-3">
           {[
-            { icon: EyeOff, t: "هوية محجوبة", d: "يظهر البائع برمز مثل «ب-٢٧١٤» ويظهر المشتري برمز مماثل." },
+            { icon: EyeOff, t: "هوية محجوبة", d: "يظهر البائع برمز مثل «ع-٢٧١٤» ويظهر المشتري برمز مماثل." },
             { icon: MessagesSquare, t: "تفاوض عبر الوسيط", d: "العروض والعروض المقابلة تمر عبر موظف العلوة فقط." },
             { icon: BadgeCheck, t: "حسابات موثّقة", d: "التحقق من الهوية ورقم الهاتف قبل السماح بالبيع أو الشراء." },
           ].map((x) => (
@@ -66,6 +66,20 @@ function HowItWorks() {
             <TermList icon={XCircle} tone="text-destructive" title="يُصادر لصالح البائع إذا" items={FORFEIT} />
           </div>
           <p className="mt-6 text-xs text-ink-muted">* هذه شروط أولية للمعاينة وتحتاج لمراجعة قانونية قبل الإطلاق. لا يوجد دفع حقيقي في هذه النسخة.</p>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-3">
+          {[
+            { icon: Ban, t: "لا تواصل مباشر", d: "يمنع النظام تلقائياً إرسال أرقام الهواتف والروابط وحسابات التواصل في المحادثات والإعلانات والتقييمات." },
+            { icon: Star, t: "تقييم بعد الاستلام فقط", d: "يقيّم المشتري البائع مرة واحدة لكل صفقة، وفقط بعد اكتمالها واستلام المواشي." },
+            { icon: Gauge, t: "نقاط موثوقية", d: "لكل حساب نقاط من ١٠٠ ترتفع بالتوثيق والصفقات المكتملة والتعامل الجيد، وتنخفض بالشكاوى المثبتة والانسحاب بعد القبول." },
+          ].map((x) => (
+            <div key={x.t} className="rounded-2xl border border-border bg-card p-6">
+              <x.icon className="size-7 text-primary" />
+              <h2 className="mt-3 font-display text-xl">{x.t}</h2>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{x.d}</p>
+            </div>
+          ))}
         </section>
 
         <section className="grid gap-4 md:grid-cols-2">

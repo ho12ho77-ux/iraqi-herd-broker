@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ANIMAL_TYPES, formatIQD } from "@/lib/market";
+import { ANIMAL_TYPES, detectContactInfo, formatIQD } from "@/lib/market";
 
 export const Route = createFileRoute("/sell")({
   head: () => ({
@@ -28,6 +28,8 @@ export const Route = createFileRoute("/sell")({
 function SellPage() {
   const [loc, setLoc] = useState<LocationValue>({ governorate: "", district: "", area: "" });
   const [price, setPrice] = useState("");
+  const [notes, setNotes] = useState("");
+  const blocked = detectContactInfo(notes);
   return (
     <>
       <PageHeading eyebrow="للبائعين" title="اعرض مواشيك للبيع">
@@ -37,6 +39,7 @@ function SellPage() {
         className="mx-auto grid max-w-4xl gap-6 px-4 py-10 sm:px-6"
         onSubmit={(e) => {
           e.preventDefault();
+          if (blocked) return;
           toast.success("أُرسل الإعلان للمراجعة", { description: "نسخة معاينة: لم يُنشر الإعلان فعلياً." });
         }}
       >
@@ -90,7 +93,8 @@ function SellPage() {
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="notes">وصف إضافي</Label>
-            <Textarea id="notes" rows={3} placeholder="نوع العلف، التلقيحات، الحالة الصحية…" />
+            <Textarea id="notes" rows={3} placeholder="نوع العلف، التلقيحات، الحالة الصحية…" value={notes} onChange={(e) => setNotes(e.target.value)} aria-invalid={!!blocked} />
+            {blocked && <p role="alert" className="text-xs text-destructive">ممنوع كتابة {blocked} في الإعلان — يتواصل المشترون معك عبر وسيط العلوة فقط.</p>}
           </div>
           <label className="flex items-center gap-3 text-sm"><Checkbox /> لدي شهادة فحص بيطري حديثة</label>
         </section>
@@ -101,7 +105,7 @@ function SellPage() {
           <p className="flex items-center gap-2 text-xs text-muted-foreground"><EyeOff className="size-4" /> يظهر للمشترين المحافظة والقضاء فقط. الموقع الدقيق يُستخدم لتنسيق النقل.</p>
         </section>
 
-        <Button type="submit" size="xl" className="justify-self-start">إرسال الإعلان للمراجعة</Button>
+        <Button type="submit" size="xl" className="justify-self-start" disabled={!!blocked}>إرسال الإعلان للمراجعة</Button>
       </form>
     </>
   );

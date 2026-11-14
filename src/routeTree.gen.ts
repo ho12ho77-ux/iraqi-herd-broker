@@ -12,12 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as ListingsIndexRouteImport } from './routes/listings.index'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
+import { Route as SellersSellerIdRouteImport } from './routes/sellers.$sellerId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,6 +34,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -64,27 +71,36 @@ const ListingsIdRoute = ListingsIdRouteImport.update({
   path: '/listings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellersSellerIdRoute = SellersSellerIdRouteImport.update({
+  id: '/sellers/$sellerId',
+  path: '/sellers/$sellerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sellers/$sellerId': typeof SellersSellerIdRoute
   '/listings/': typeof ListingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sellers/$sellerId': typeof SellersSellerIdRoute
   '/listings': typeof ListingsIndexRoute
 }
 export interface FileRoutesById {
@@ -92,11 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/cart': typeof CartRoute
   '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/sell': typeof SellRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/sellers/$sellerId': typeof SellersSellerIdRoute
   '/listings/': typeof ListingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -105,33 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/cart'
     | '/how-it-works'
     | '/login'
     | '/register'
     | '/sell'
     | '/listings/$id'
+    | '/sellers/$sellerId'
     | '/listings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
     | '/admin'
+    | '/cart'
     | '/how-it-works'
     | '/login'
     | '/register'
     | '/sell'
     | '/listings/$id'
+    | '/sellers/$sellerId'
     | '/listings'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/admin'
+    | '/cart'
     | '/how-it-works'
     | '/login'
     | '/register'
     | '/sell'
     | '/listings/$id'
+    | '/sellers/$sellerId'
     | '/listings/'
   fileRoutesById: FileRoutesById
 }
@@ -139,11 +163,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  CartRoute: typeof CartRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   SellRoute: typeof SellRoute
   ListingsIdRoute: typeof ListingsIdRoute
+  SellersSellerIdRoute: typeof SellersSellerIdRoute
   ListingsIndexRoute: typeof ListingsIndexRoute
 }
 
@@ -168,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -212,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sellers/$sellerId': {
+      id: '/sellers/$sellerId'
+      path: '/sellers/$sellerId'
+      fullPath: '/sellers/$sellerId'
+      preLoaderRoute: typeof SellersSellerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -219,11 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  CartRoute: CartRoute,
   HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   SellRoute: SellRoute,
   ListingsIdRoute: ListingsIdRoute,
+  SellersSellerIdRoute: SellersSellerIdRoute,
   ListingsIndexRoute: ListingsIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -2,14 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { BadgeCheck, MapPin, Scale, Stethoscope } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatIQD, formatNum, type Listing } from "@/lib/market";
+import { CartButton } from "./CartButton";
 
 export function ListingCard({ listing }: { listing: Listing }) {
   return (
-    <Link
-      to="/listings/$id"
-      params={{ id: listing.id }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
-    >
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img src={listing.image} alt={listing.title} loading="lazy" width={1024} height={768} className="size-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <div className="absolute inset-x-3 top-3 flex items-center justify-between">
@@ -21,7 +18,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3 className="font-display text-lg leading-snug">{listing.title}</h3>
+          <h3 className="font-display text-lg leading-snug">
+            <Link to="/listings/$id" params={{ id: listing.id }} className="after:absolute after:inset-0">
+              {listing.title}
+            </Link>
+          </h3>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="size-3.5" /> {listing.governorate} — {listing.district}
           </p>
@@ -29,16 +30,17 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="flex items-center gap-1"><Scale className="size-3.5" /> {formatNum(listing.avgWeight)} كغم</span>
           <span>العدد: {formatNum(listing.count)}</span>
+          <span>{formatNum(listing.offers)} عروض سرية</span>
           {listing.vetCertificate && <span className="flex items-center gap-1 text-success"><Stethoscope className="size-3.5" /> فحص بيطري</span>}
         </div>
-        <div className="mt-auto flex items-end justify-between border-t border-dashed border-border pt-3">
+        <div className="mt-auto flex items-end justify-between gap-2 border-t border-dashed border-border pt-3">
           <div>
             <p className="text-xs text-muted-foreground">السعر للرأس</p>
             <p className="font-display text-xl font-bold text-primary">{formatIQD(listing.pricePerHead)}</p>
           </div>
-          <span className="text-xs text-muted-foreground">{formatNum(listing.offers)} عروض سرية</span>
+          <CartButton listing={listing} compact className="relative z-10" />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { GUARANTEE_RATE, formatIQD, formatNum, getListing, guaranteeAmount } from "@/lib/market";
+import { CartButton } from "@/components/site/CartButton";
+import { FollowButton } from "@/components/site/FollowButton";
+import { Stars, TrustMeter } from "@/components/site/TrustMeter";
+import { GUARANTEE_RATE, averageStars, detectContactInfo, formatIQD, formatNum, getListing, guaranteeAmount, sellerOf, sellerTrust } from "@/lib/market";
 
 export const Route = createFileRoute("/listings/$id")({
   loader: ({ params }) => {
@@ -45,6 +48,8 @@ function ListingPage() {
   const p = Number(price) || 0;
   const c = Math.min(Number(count) || 0, listing.count);
   const total = p * c;
+  const seller = sellerOf(listing);
+  const blocked = detectContactInfo(note);
 
   const specs = [
     { icon: Users, label: "العدد", value: `${formatNum(listing.count)} رأس` },
@@ -92,12 +97,28 @@ function ListingPage() {
               <h2 className="font-display text-lg">وصف البائع</h2>
               <p className="mt-2 leading-8 text-muted-foreground">{listing.notes}</p>
             </div>
-            <div className="mt-4 flex items-start gap-3 rounded-2xl border border-border bg-card p-5">
-              <EyeOff className="mt-0.5 size-5 shrink-0 text-primary" />
-              <div className="text-sm leading-7">
-                <p className="font-semibold">البائع: {listing.sellerCode} {listing.verified && <span className="text-success">· حساب موثّق</span>}</p>
-                <p className="text-muted-foreground">اسم البائع ورقم هاتفه وموقعه الدقيق محجوبة. يتواصل وسيط العلوة معه نيابةً عنك.</p>
+            <div className="mt-4 grid gap-4 rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-start gap-3">
+                <EyeOff className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="flex-1 text-sm leading-7">
+                  <p className="font-semibold">البائع: {listing.sellerCode} {listing.verified && <span className="text-success">· حساب موثّق</span>}</p>
+                  <p className="text-muted-foreground">اسم البائع ورقم هاتفه وموقعه الدقيق محجوبة. يتواصل وسيط العلوة معه نيابةً عنك.</p>
+                  {seller && (
+                    <p className="mt-1 flex items-center gap-2 text-muted-foreground">
+                      <Stars value={averageStars(seller.reviews.map((r) => r.stars))} /> {formatNum(seller.reviews.length)} تقييم · {formatNum(seller.completedDeals)} صفقة مكتملة
+                    </p>
+                  )}
+                </div>
               </div>
+              {seller && (
+                <>
+                  <TrustMeter score={sellerTrust(seller)} />
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="outline" size="sm"><Link to="/sellers/$sellerId" params={{ sellerId: seller.id }}>صفحة البائع</Link></Button>
+                    <FollowButton sellerId={seller.id} sellerCode={seller.code} size="sm" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -113,6 +134,7 @@ function ListingPage() {
               className="mt-6 grid gap-4"
               onSubmit={(e) => {
                 e.preventDefault();
+                if (blocked) return;
                 toast.success("تم إرسال عرضك السري إلى وسيط العلوة", {
                   description: "نسخة معاينة: لم يُحفظ العرض ولم يُطلب أي دفع.",
                 });
@@ -133,7 +155,8 @@ function ListingPage() {
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="note">ملاحظة للوسيط (اختياري)</Label>
-                <Textarea id="note" rows={3} placeholder="مثال: أرغب بالاستلام خلال أسبوع في بغداد" value={note} onChange={(e) => setNote(e.target.value)} />
+                <Textarea id="note" rows={3} placeholder="مثال: أرغب بالاستلام خلال أسبوع في بغداد" value={note} onChange={(e) => setNote(e.target.value)} aria-invalid={!!blocked} />
+                {blocked && <p role="alert" className="text-xs text-destructive">ممنوع إرسال {blocked} — التواصل يتم عبر وسيط العلوة فقط.</p>}
               </div>
 
               <div className="rounded-2xl border border-dashed border-border bg-secondary/50 p-4 text-sm">
@@ -141,7 +164,8 @@ function ListingPage() {
                 <div className="mt-2 flex justify-between"><span className="text-muted-foreground">ضمان الجدية ({formatNum(GUARANTEE_RATE * 100)}٪)</span><span className="font-display text-lg font-bold text-primary">{formatIQD(guaranteeAmount(p, c))}</span></div>
                 <p className="mt-2 text-xs leading-6 text-muted-foreground">يُطلب الضمان فقط بعد قبول البائع لعرضك، ويُخصم من الثمن عند الاستلام.</p>
               </div>
-              <Button type="submit" size="xl" disabled={total <= 0}>إرسال العرض السري</Button>
+              <Button type="submit" size="xl" disabled={total <= 0 || !!blocked}>إرسال العرض السري</Button>
+              <CartButton listing={listing} count={c || listing.count} />
               <Link to="/how-it-works" className="flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-foreground">
                 <ShieldCheck className="size-3.5" /> شروط ضمان الجدية
               </Link>

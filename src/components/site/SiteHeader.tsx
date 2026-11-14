@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, UserRound } from "lucide-react";
+import { Menu, ShoppingBasket, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useCart } from "@/lib/store";
+import { formatNum } from "@/lib/market";
 import { Logo } from "./Logo";
 
 const NAV = [
@@ -11,6 +13,20 @@ const NAV = [
   { to: "/account", label: "حسابي" },
   { to: "/admin", label: "لوحة الإدارة" },
 ] as const;
+
+function CartLink() {
+  const n = Object.keys(useCart()).length;
+  return (
+    <Button asChild variant="outline" size="icon" className="relative" aria-label={`السلة (${n})`}>
+      <Link to="/cart">
+        <ShoppingBasket />
+        {n > 0 && (
+          <span className="absolute -top-1.5 -left-1.5 grid size-5 place-items-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground">{formatNum(n)}</span>
+        )}
+      </Link>
+    </Button>
+  );
+}
 
 export function SiteHeader() {
   return (
@@ -30,6 +46,7 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <CartLink />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/login">دخول</Link>
           </Button>

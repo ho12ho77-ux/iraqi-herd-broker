@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  AlertTriangle, BadgeCheck, Banknote, ClipboardList, Crown, FileSearch, Handshake, LayoutDashboard,
-  Lock, Settings, ShieldCheck, Truck, UserCog, Users,
+  AlertTriangle, BadgeCheck, Banknote, BarChart3, ClipboardList, Crown, FileSearch, Handshake, History, LayoutDashboard,
+  Lock, ScanFace, Settings, ShieldCheck, Star, Truck, UserCog, Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {
-  LISTINGS, sampleListing, ROLE_LABEL, ROLE_SECTIONS, SECTION_LABEL, canAccess, formatIQD, formatNum, guaranteeAmount,
+  LISTINGS, SELLERS, sampleListing, ROLE_LABEL, averageStars, sellerTrust, trustLevel, ROLE_SECTIONS, SECTION_LABEL, canAccess, formatIQD, formatNum, guaranteeAmount,
   type AdminSection, type StaffRole,
 } from "@/lib/market";
 
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 const ICONS: Record<AdminSection, LucideIcon> = {
-  overview: LayoutDashboard, deals: Handshake, listings: FileSearch, verification: BadgeCheck,
+  overview: LayoutDashboard, reports: BarChart3, fraud: ScanFace, reviews: Star, audit: History, deals: Handshake, listings: FileSearch, verification: BadgeCheck,
   complaints: AlertTriangle, logistics: Truck, guarantees: Banknote, users: Users, staff: UserCog, settings: Settings,
 };
 
@@ -95,6 +95,10 @@ function AdminPage() {
           {active === "users" && <UsersSection />}
           {active === "staff" && <Staff />}
           {active === "settings" && <SettingsSection />}
+          {active === "reports" && <Reports />}
+          {active === "fraud" && <Fraud />}
+          {active === "reviews" && <Reviews />}
+          {active === "audit" && <Audit />}
         </section>
       </div>
     </div>
@@ -144,6 +148,30 @@ function Overview({ role }: { role: StaffRole }) {
           </Panel>
         ))}
       </div>
+      {role === "super_admin" && (
+        <Panel className="grid gap-4 p-5">
+          <p className="flex items-center gap-2 font-display text-lg"><Crown className="size-5 text-accent" /> لوحة المدير الأعلى</p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              { l: "صفقات مستلمة هذا الأسبوع", v: "٢١" },
+              { l: "ضمانات محجوزة", v: formatIQD(18_450_000) },
+              { l: "حسابات مشبوهة بانتظار القرار", v: "٣" },
+              { l: "متوسط تقييم البائعين", v: "٤٫٦ / ٥" },
+            ].map((x) => (
+              <div key={x.l} className="rounded-xl bg-secondary/60 p-3">
+                <p className="font-display text-xl font-bold">{x.v}</p>
+                <p className="text-xs text-muted-foreground">{x.l}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="ink">إيقاف حساب فوراً</Button>
+            <Button size="sm" variant="outline">تجميد صفقة</Button>
+            <Button size="sm" variant="outline">بث تنبيه لكل المستخدمين</Button>
+            <Button size="sm" variant="outline">تصدير تقرير شهري</Button>
+          </div>
+        </Panel>
+      )}
       <Panel className="p-5">
         <p className="flex items-center gap-2 font-display text-lg"><ShieldCheck className="size-5 text-primary" /> صلاحيات دور «{ROLE_LABEL[role]}»</p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -155,10 +183,10 @@ function Overview({ role }: { role: StaffRole }) {
 }
 
 const DEALS = [
-  { id: "D-301", l: sampleListing(0), buyer: "م-٤٤١٧", stage: "بانتظار الضمان", v: "warning" as const },
-  { id: "D-298", l: sampleListing(1), buyer: "م-١٢٠٣", stage: "تفاوض", v: "accent" as const },
-  { id: "D-295", l: sampleListing(5), buyer: "م-٣٣٨٠", stage: "قيد النقل", v: "primary" as const },
-  { id: "D-290", l: sampleListing(6), buyer: "م-٠٧٧٢", stage: "مكتملة", v: "success" as const },
+  { id: "D-301", l: sampleListing(0), buyer: "ع-٤٤١٧", stage: "بانتظار الضمان", v: "warning" as const },
+  { id: "D-298", l: sampleListing(1), buyer: "ع-١٢٠٣", stage: "تفاوض", v: "accent" as const },
+  { id: "D-295", l: sampleListing(5), buyer: "ع-٣٣٨٠", stage: "قيد النقل", v: "primary" as const },
+  { id: "D-290", l: sampleListing(6), buyer: "ع-٠٧٧٢", stage: "مكتملة", v: "success" as const },
 ];
 
 function Deals() {
@@ -192,9 +220,9 @@ function ListingsReview() {
 
 function Verification() {
   const rows = [
-    ["م-٤٤١٧", "مشترٍ", "بغداد — الكرخ", "بطاقة وطنية", "منذ ساعة"],
-    ["ب-٦٠١٢", "بائع", "ميسان — العمارة", "بطاقة وطنية", "منذ ٣ ساعات"],
-    ["ب-٦٠١٥", "بائع", "كربلاء — عين التمر", "بطاقة + حيازة", "أمس"],
+    ["ع-٤٤١٧", "حساب موحّد", "بغداد — الكرخ", "بطاقة + سيلفي", "منذ ساعة"],
+    ["ع-٦٠١٢", "حساب موحّد", "ميسان — العمارة", "بطاقة وطنية", "منذ ٣ ساعات"],
+    ["ع-٦٠١٥", "حساب موحّد", "كربلاء — عين التمر", "بطاقة + سيلفي", "أمس"],
   ];
   return (
     <Table
@@ -236,12 +264,12 @@ function Guarantees() {
 
 function UsersSection() {
   const rows = [
-    ["م-٤٤١٧", "مشترٍ", "بغداد", <Badge variant="warning">قيد التوثيق</Badge>, formatNum(4)],
-    ["ب-٢٧١٤", "بائع", "الأنبار", <Badge variant="success">موثّق</Badge>, formatNum(12)],
-    ["ب-٠٩٣٢", "بائع", "ذي قار", <Badge variant="success">موثّق</Badge>, formatNum(7)],
-    ["م-٠٧٧٢", "مشترٍ", "كركوك", <Badge variant="danger">موقوف</Badge>, formatNum(1)],
+    ["ع-٤٤١٧", "شراء وبيع", "بغداد", <Badge variant="warning">قيد التوثيق</Badge>, formatNum(4)],
+    ["ع-٢٧١٤", "بيع غالباً", "الأنبار", <Badge variant="success">موثّق</Badge>, formatNum(12)],
+    ["ع-٠٩٣٢", "بيع وشراء", "ذي قار", <Badge variant="success">موثّق</Badge>, formatNum(7)],
+    ["ع-٠٧٧٢", "شراء غالباً", "كركوك", <Badge variant="danger">موقوف</Badge>, formatNum(1)],
   ];
-  return <Table head={["الرمز", "النوع", "المحافظة", "الحالة", "الصفقات"]} rows={rows} />;
+  return <Table head={["الرمز", "النشاط", "المحافظة", "الحالة", "الصفقات"]} rows={rows} />;
 }
 
 function Staff() {
@@ -283,6 +311,9 @@ function SettingsSection() {
     { t: "إلزام التوثيق قبل تقديم العروض", on: true },
     { t: "إلزام شهادة الفحص البيطري للأبقار والإبل", on: false },
     { t: "استقبال تسجيلات جديدة", on: true },
+    { t: "منع أرقام الهواتف والروابط في المحادثات والملاحظات", on: true },
+    { t: "قبول التقييم فقط بعد استلام الصفقة", on: true },
+    { t: "رفض الحسابات المكررة (نفس الهاتف أو البطاقة)", on: true },
   ];
   return (
     <Panel className="grid gap-1 p-2">
@@ -296,4 +327,97 @@ function SettingsSection() {
       ))}
     </Panel>
   );
+}
+
+function Reports() {
+  const weeks = [
+    { w: "الأسبوع ١", v: 9 },
+    { w: "الأسبوع ٢", v: 14 },
+    { w: "الأسبوع ٣", v: 17 },
+    { w: "الأسبوع ٤", v: 21 },
+  ];
+  const max = Math.max(...weeks.map((x) => x.v));
+  const govs = [
+    { g: "الأنبار", v: 31 }, { g: "ذي قار", v: 24 }, { g: "نينوى", v: 19 }, { g: "بابل", v: 15 }, { g: "السليمانية", v: 11 },
+  ];
+  return (
+    <div className="grid gap-5 lg:grid-cols-2">
+      <Panel className="p-5">
+        <p className="font-display text-lg">صفقات مستلمة أسبوعياً</p>
+        <div className="mt-4 flex h-44 items-end gap-3">
+          {weeks.map((x) => (
+            <div key={x.w} className="flex flex-1 flex-col items-center gap-2">
+              <span className="text-xs font-semibold">{formatNum(x.v)}</span>
+              <div className="w-full rounded-t-lg bg-primary" style={{ height: `${(x.v / max) * 100}%` }} />
+              <span className="text-[11px] text-muted-foreground">{x.w}</span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+      <Panel className="p-5">
+        <p className="font-display text-lg">أكثر المحافظات نشاطاً (صفقات هذا الشهر)</p>
+        <ul className="mt-4 grid gap-3">
+          {govs.map((x) => (
+            <li key={x.g} className="grid gap-1">
+              <div className="flex justify-between text-sm"><span>{x.g}</span><span className="font-semibold">{formatNum(x.v)}</span></div>
+              <div className="h-2 rounded-full bg-muted"><div className="h-full rounded-full bg-gold" style={{ width: `${(x.v / govs[0]!.v) * 100}%` }} /></div>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+    </div>
+  );
+}
+
+function Fraud() {
+  const rows = [
+    ["ع-٧٢٠١", "نفس رقم الهاتف مستخدم في حساب موقوف", <Badge variant="danger">خطر مرتفع</Badge>],
+    ["ع-٧١٨٨", "صورة البطاقة لا تطابق الصورة الشخصية", <Badge variant="danger">خطر مرتفع</Badge>],
+    ["ع-٧١٥٠", "٣ حسابات من نفس الجهاز خلال يوم", <Badge variant="warning">مشتبه</Badge>],
+    ["ع-٧٠٩٤", "١٢ عرضاً خلال ساعة دون دفع أي ضمان", <Badge variant="warning">مشتبه</Badge>],
+  ];
+  return (
+    <div className="grid gap-4">
+      <Panel className="p-5 text-sm leading-7 text-muted-foreground">
+        يُمنع تسجيل أكثر من حساب برقم هاتف واحد أو بطاقة وطنية واحدة. يرصد النظام تلقائياً: الأجهزة المكررة، عدم تطابق الصورة الشخصية مع البطاقة، والعروض الكثيرة بلا ضمان.
+      </Panel>
+      <Table
+        head={["الحساب", "سبب الاشتباه", "المستوى", ""]}
+        rows={rows.map((r) => [...r, <div className="flex gap-2"><Button size="sm" variant="ink">إيقاف</Button><Button size="sm" variant="outline">طلب توثيق إضافي</Button><Button size="sm" variant="ghost">سليم</Button></div>])}
+      />
+    </div>
+  );
+}
+
+function Reviews() {
+  return (
+    <div className="grid gap-4">
+      <Table
+        head={["البائع", "المحافظة", "التقييم", "الموثوقية", "صفقات مكتملة"]}
+        rows={SELLERS.map((s) => {
+          const score = sellerTrust(s);
+          const stars = s.reviews.map((x) => x.stars);
+          return [
+            s.code,
+            s.governorate,
+            stars.length ? `${formatNum(averageStars(stars))} ★ (${formatNum(stars.length)})` : "—",
+            <Badge variant={trustLevel(score).variant}>{formatNum(score)} · {trustLevel(score).label}</Badge>,
+            formatNum(s.completedDeals),
+          ];
+        })}
+      />
+      <Panel className="p-5 text-sm text-muted-foreground">التقييمات مقبولة فقط من مشترين أكملوا صفقة مستلمة. يمكن للطاقم إخفاء تقييم مسيء أو يحتوي وسائل تواصل.</Panel>
+    </div>
+  );
+}
+
+function Audit() {
+  const rows = [
+    ["١٤:٢٠", "المدير الأعلى", "غيّر صلاحيات «مدير العمليات»", "الطاقم"],
+    ["١٣:٠٥", "موظف توثيق — بغداد", "وثّق الحساب ع-٦٠١٢", "التوثيق"],
+    ["١١:٤٨", "مدير العمليات", "أوقف الحساب ع-٧٢٠١ (هاتف مكرر)", "الحسابات الوهمية"],
+    ["١٠:٣٠", "النظام", "منع رسالة تحتوي رقم هاتف في الصفقة D-298", "الوساطة"],
+    ["٠٩:١٥", "موظف نقل — البصرة", "حدّث حالة الشحنة D-295 إلى «في الطريق»", "النقل"],
+  ];
+  return <Table head={["الوقت", "المنفّذ", "الإجراء", "القسم"]} rows={rows} />;
 }
